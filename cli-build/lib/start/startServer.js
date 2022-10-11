@@ -1,22 +1,27 @@
 const chokidar = require('chokidar');
 const path = require('path');
 const cp = require('child_process')
+
+let child;
 function runServer() {
-  // 启动webpack服务ce
-
-
   // 启动子进程
-  console.log('pid', process.pid)
   const scriptPath = path.resolve(__dirname,'./DevService.js')
-  const child = cp.fork(scriptPath, ['--port 8080'])
-  child.on('message',data => {
+  child = cp.fork(scriptPath, ['--port 8080'])
 
+   // 主进程退出
+  child.on('exit', code => {
+    if(code){
+      process.exit(code)
+    }
   })
-  
 }
 
 function onChange() {
-  console.log('change')
+  // 关闭子进程
+  child.kill()
+
+  // 重新启动子进程
+  runServer()
 }
 
 function runWatcher() {
@@ -38,5 +43,5 @@ module.exports = function (arg, opts, cmd) {
   runServer();
 
   // 2. 监听配置修改
-  // runWatcher();
+  runWatcher();
 };

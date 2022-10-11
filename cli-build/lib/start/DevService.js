@@ -1,4 +1,7 @@
 const detect = require('detect-port');
+const inquirer = require('inquirer');
+// const Service = require('../service/Service')
+
 (async function(){
     const DEFAULT_PORT = 8000;
     const params = process.argv.slice(2);
@@ -16,7 +19,22 @@ const detect = require('detect-port');
         if(newPort === defaultPort){
             console.log(`端口号 ${defaultPort} 可以使用`)
         }else{
-            console.log(`端口号 ${defaultPort} 被占用，建议使用新端口号：${newPort}`)
+            // 命令行交互
+            const questions = {
+                type: 'list',
+                name: 'answer',
+                message:`${defaultPort}端口号已被占用，是否启用新端口号 ${newPort}?`,
+            };
+            const { answer } = await inquirer.prompt(questions)
+            if(!answer){
+                process.exit(1)
+            }
+            process.env.NODE_ENV = 'development'
+            const args = {
+                port: newPort
+            }
+            // const service = new Service(args)
+            // service.start()
         }
     }catch(e){
         console.error(e)
